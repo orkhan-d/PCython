@@ -1,0 +1,19 @@
+from aiogram import types
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+
+import states
+
+from loader import dp
+
+@dp.message_handler(commands=['start'], state=None)
+async def set_config(message: types.Message):
+    welcome_text = ('Hi! It\'s bot to control your PC from Telegram!\n\n'
+    'To start using you should set up SSH server on your PC and send me credetianals to log in\n\n'
+
+    'All credetianals will be saved as .ini file on PC this bot launched and nobody wil have access to them!')
+    
+    await message.answer(welcome_text,
+        reply_markup= ReplyKeyboardMarkup([
+            [KeyboardButton('Send credetianals')]
+        ], resize_keyboard=True)
+    )
