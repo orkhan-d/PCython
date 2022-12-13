@@ -54,13 +54,47 @@ async def volup(query: types.CallbackQuery):
 
     if query.data=='volupm':
         comms = [
-            'amixer -c 1 -q set Master toggle',
+            'amixer -c 1 -q set Master unmute',
             'amixer -c 1 -q set Headphone unmute',
             'amixer -c 1 -q set Speaker unmute'
         ]
         stdin, stdout, stderr = client.exec_command(' && '.join(comms+['amixer -c 1 -q set Master 10%+']))
     else:
         stdin, stdout, stderr = client.exec_command('amixer -c 1 -q set Master 10%+')
+
+    try:
+        server_reply = stdout.read().decode()
+        await query.answer(cache_time=2)
+    except:
+        pass
+
+    client.close()
+
+@dp.callback_query_handler(lambda msg: msg.data=='pb-play-pause')
+async def volup(query: types.CallbackQuery):
+    creds = ConfigParser()
+    creds.read('config.ini')
+
+    client.connect(**(creds['CREDETIANALS']))
+    
+    stdin, stdout, stderr = client.exec_command('playerctl play-pause')
+
+    try:
+        server_reply = stdout.read().decode()
+        await query.answer(cache_time=2)
+    except:
+        pass
+
+    client.close()
+
+@dp.callback_query_handler(lambda msg: msg.data=='pb-stop')
+async def volup(query: types.CallbackQuery):
+    creds = ConfigParser()
+    creds.read('config.ini')
+
+    client.connect(**(creds['CREDETIANALS']))
+    
+    stdin, stdout, stderr = client.exec_command('playerctl stop')
 
     try:
         server_reply = stdout.read().decode()
