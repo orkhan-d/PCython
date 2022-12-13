@@ -9,3 +9,4 @@ Python script to control PC from anywhere
 
 ## Available functions:
 * Volume control
+* Playback control
