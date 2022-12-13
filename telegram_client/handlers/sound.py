@@ -3,8 +3,11 @@ from bot import client
 from loader import dp, types
 from configparser import ConfigParser
 
-@dp.message_handler(commands=['mute', 'unmute'])
-async def toggle_mute(message: types.Message):
+from keyboards.inline.markups import get_main_menu
+from other.get_pc_state import is_muted
+
+@dp.callback_query_handler(lambda msg: msg.data in ['mute', 'unmute'])
+async def voldown(query: types.CallbackQuery):
     creds = ConfigParser()
     creds.read('config.ini')
 
@@ -15,49 +18,53 @@ async def toggle_mute(message: types.Message):
         'amixer -c 1 -q set Speaker unmute'
     ]
 
-    stdin, stdout, stderr = client.exec_command(comms[0] if message.get_command()=='mute' else ' && '.join(comms))
+    stdin, stdout, stderr = client.exec_command(comms[0] if query.data=='mute' else ' && '.join(comms))
 
     try:
         server_reply = stdout.read().decode()
-        await message.answer(server_reply)
-    except:
-        pass
+        await query.answer(cache_time=2)
+        await query.message.edit_reply_markup(
+            get_main_menu(is_muted(creds['CREDETIANALS']))
+        )
+    except Exception as e:
+        print(e)
 
-@dp.message_handler(commands=['voldown'])
-async def main(message: types.Message):
-    args = message.get_args()
-    if not args:
-        args = 5
-
+@dp.callback_query_handler(lambda msg: msg.data=='voldown')
+async def voldown(query: types.CallbackQuery):
     creds = ConfigParser()
     creds.read('config.ini')
 
     client.connect(**(creds['CREDETIANALS']))
-    stdin, stdout, stderr = client.exec_command(f'amixer -c 1 -q set Master {args}%-')
+    stdin, stdout, stderr = client.exec_command('amixer -c 1 -q set Master 10%-')
 
     try:
         server_reply = stdout.read().decode()
-        await message.answer(server_reply)
+        await query.answer(cache_time=2)
     except:
         pass
 
     client.close()
 
-@dp.message_handler(commands=['volup'])
-async def main(message: types.Message):
-    args = message.get_args()
-    if not args:
-        args = 5
-
+@dp.callback_query_handler(lambda msg: msg.data.startswith('volup'))
+async def volup(query: types.CallbackQuery):
     creds = ConfigParser()
     creds.read('config.ini')
 
     client.connect(**(creds['CREDETIANALS']))
-    stdin, stdout, stderr = client.exec_command(f'amixer -c 1 -q set Master {args}%+')
+
+    if query.data=='volupm':
+        comms = [
+            'amixer -c 1 -q set Master toggle',
+            'amixer -c 1 -q set Headphone unmute',
+            'amixer -c 1 -q set Speaker unmute'
+        ]
+        stdin, stdout, stderr = client.exec_command(' && '.join(comms+['amixer -c 1 -q set Master 10%+']))
+    else:
+        stdin, stdout, stderr = client.exec_command('amixer -c 1 -q set Master 10%+')
 
     try:
         server_reply = stdout.read().decode()
-        await message.answer(server_reply)
+        await query.answer(cache_time=2)
     except:
         pass
 

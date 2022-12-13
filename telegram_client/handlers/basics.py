@@ -1,6 +1,10 @@
 from aiogram import types
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
+from other.get_pc_state import is_muted
+from keyboards.inline.markups import get_main_menu
+
+import configparser
 import states
 
 from loader import dp
@@ -16,4 +20,14 @@ async def set_config(message: types.Message):
         reply_markup= ReplyKeyboardMarkup([
             [KeyboardButton('Send credetianals')]
         ], resize_keyboard=True)
+    )
+
+@dp.message_handler(lambda msg: msg.text=='Menu', state=None)
+async def main_menu(message: types.Message):
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    creds = config['CREDETIANALS']
+    
+    await message.answer(
+        'Main menu:', reply_markup=get_main_menu(is_muted(creds))
     )
