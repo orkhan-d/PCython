@@ -1,8 +1,9 @@
 from aiogram import types
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
-from other.get_pc_state import is_muted
+from other.get_pc_state import is_muted, get_dirs
 from keyboards.inline.markups import get_main_menu
+from keyboards.reply.markups import get_cd_menu
 
 import configparser
 import states
@@ -22,12 +23,15 @@ async def set_config(message: types.Message):
         ], resize_keyboard=True)
     )
 
-@dp.message_handler(lambda msg: msg.text=='Menu', state=None)
+@dp.message_handler(commands=['menu'], state=None)
 async def main_menu(message: types.Message):
     config = configparser.ConfigParser()
     config.read('config.ini')
     creds = config['CREDETIANALS']
     
     await message.answer(
-        'Main menu:', reply_markup=get_main_menu(is_muted(creds))
+        '=======Main menu=======', reply_markup=get_main_menu(is_muted(creds))
+    )
+    await message.answer(
+        'Current directory', reply_markup=get_cd_menu(get_dirs(creds))
     )

@@ -66,17 +66,19 @@ async def get_name(message: types.Message, state: FSMContext):
 
     print((await state.get_data()))
 
-    with open('config.ini', 'w') as conf:
-        config.write(conf)
-
     await state.finish()
     await message.answer('Trying to connect...')
     
     try:
         client.connect(**config['CREDETIANALS'])
+        stdin, stdout, stderr = client.exec_command('pwd')
+        config['PC_STATE']['cur_dir'] = stdout.read()
+        with open('config.ini', 'w') as conf:
+            config.write(conf)
+
         client.close()
 
-        await message.answer('Good job! Now you can cntrol your PC!')
+        await message.answer('Good job! Now you can cntrol your PC! Enter /menu for functions')
     except Exception as e:
         print(e)
         await message.answer('Error! Check credetianals more one time and retry!', 
