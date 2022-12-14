@@ -8,6 +8,7 @@ def is_muted(creds: dict):
 
     return out!=''
 
+
 def get_dirs(creds: dict):
     client.connect(**creds, timeout=5)
     stdin, stdout, stderr = client.exec_command("ls -a")

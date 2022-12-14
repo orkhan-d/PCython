@@ -64,8 +64,6 @@ async def get_name(message: types.Message, state: FSMContext):
     config = configparser.ConfigParser()
     config['CREDETIANALS'] = await state.get_data()
 
-    print((await state.get_data()))
-
     await state.finish()
     await message.answer('Trying to connect...')
     

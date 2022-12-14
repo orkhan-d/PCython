@@ -1,5 +1,6 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
+
 def get_cd_menu(dirs: list[str]):
     return ReplyKeyboardMarkup(
         keyboard=[
