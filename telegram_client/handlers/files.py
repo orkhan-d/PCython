@@ -1,8 +1,8 @@
 from aiogram import types
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
-from other.get_pc_state import is_muted, get_dirs
-from keyboards.inline.markups import get_main_menu
+from other.get_pc_state import get_dirs
+import os
 from keyboards.reply.markups import get_cd_menu
 
 import configparser
@@ -11,6 +11,28 @@ import states
 from loader import dp
 
 from bot import client
+
+@dp.message_handler(lambda m: m.text[-1]!='/', state=None)
+async def download_file(message: types.Message):
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+
+    try:
+        os.mkdir('files')
+    except: pass
+
+    client.connect(**(config['CREDETIANALS']))
+    with client.open_sftp() as sftp:
+        sftp.get(
+            '{}/{}'.format(
+                config["PC_STATE"]['curdir'], message.text
+            ), 'files/'+message.text
+        )
+
+        await message.answer_document(open('files/'+message.text, 'rb'))
+        os.remove('files/'+message.text)
+    
+    client.close()
 
 @dp.message_handler(lambda m: m.text[-1]=='/', state=None)
 async def change_dir(message: types.Message):
